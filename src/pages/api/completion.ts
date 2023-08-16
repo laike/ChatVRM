@@ -22,7 +22,9 @@ export default async function handler(req:Request, context:Response) {
   return new Response(completion.body, {
     status: 200,
     headers: {
-      'Content-Type': 'application/json; charset=utf-8'
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control':'no-cache',
+      'Connection':'keep-alive'
     }
   })
 }
