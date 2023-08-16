@@ -1,21 +1,28 @@
-import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { Configuration, OpenAIApi } from 'openai-edge'
- 
-export const runtime = 'edge'
- 
+export const config = {
+  runtime: 'edge'
+}
 
- 
-export default async function handler(req: Request, res: Response) {
-  const body =await  req.json()
-  const config = new Configuration({
-    apiKey: body.apiKey||process.env.OPEN_AI_KEY
+export default async function handler(req:Request, context:Response) {
+  const body = await req.json();
+
+  const completion = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      stream: true,
+      ...body,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
+      'OpenAI-Organization': process.env.OPENAI_ORGANIZATION||''
+    }
+  });
+
+  return new Response(completion.body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8'
+    }
   })
-  const openai = new OpenAIApi(config)
-  const response = await openai.createChatCompletion({
-    model: 'gpt-3.5-turbo',
-    stream: true,
-    ...body
-  })
-  const stream = OpenAIStream(response)
-  return new StreamingTextResponse(stream)
 }
