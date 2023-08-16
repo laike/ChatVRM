@@ -66,10 +66,15 @@ export async function getChatResponseStream(
             .split("data:")
             .filter((val) => !!val && val.trim() !== "[DONE]");
           for (const chunk of chunks) {
-            const json = JSON.parse(chunk);
+            
+            try {
+              const json = JSON.parse(chunk);
             const messagePiece = json.choices[0].delta.content;
             if (!!messagePiece) {
               controller.enqueue(messagePiece);
+            }
+            } catch (error) {
+              
             }
           }
         }
