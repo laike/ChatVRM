@@ -10,7 +10,7 @@ export default async function handler(req:Request, context:Response) {
     body: JSON.stringify({
       model: 'gpt-3.5-turbo',
       stream: true,
-      ...body,
+      ...body
     }),
     headers: {
       'Content-Type': 'application/json',
@@ -18,11 +18,17 @@ export default async function handler(req:Request, context:Response) {
       'OpenAI-Organization': process.env.OPENAI_ORGANIZATION||''
     }
   });
-
+/*
+   headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control':'no-cache',
+      'Connection':'keep-alive'
+    }
+  */
   return new Response(completion.body, {
     status: 200,
     headers: {
-      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Content-Type': 'text/event-stream',
       'Cache-Control':'no-cache',
       'Connection':'keep-alive'
     }
