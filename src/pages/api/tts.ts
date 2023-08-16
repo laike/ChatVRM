@@ -14,7 +14,7 @@ export default async function handler(
   const speakerX = req.body.speakerX;
   const speakerY = req.body.speakerY;
   const style = req.body.style;
-  const apiKey = req.body.apiKey;
+  const apiKey = req.body.apiKey || process.env.KOEIRO_MAP_KEY;
 
   const voice = await koeiromapFreeV1(
     message,
