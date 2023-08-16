@@ -1,20 +1,20 @@
 import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { NextApiRequest } from 'next'
 import { Configuration, OpenAIApi } from 'openai-edge'
  
 export const runtime = 'edge'
  
-const config = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY
-})
-const openai = new OpenAIApi(config)
+
  
-export default async function handler(req: NextApiRequest, res: Response) {
-  const params =  req.body
+export default async function handler(req: Request, res: Response) {
+  const body =await  req.json()
+  const config = new Configuration({
+    apiKey: body.apiKey||process.env.OPEN_AI_KEY
+  })
+  const openai = new OpenAIApi(config)
   const response = await openai.createChatCompletion({
     model: 'gpt-3.5-turbo',
     stream: true,
-    ...params
+    ...body
   })
   const stream = OpenAIStream(response)
   return new StreamingTextResponse(stream)
