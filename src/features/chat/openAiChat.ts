@@ -30,15 +30,15 @@ export async function getChatResponseStream(
   messages: Message[],
   apiKey: string
 ) {
-  if (!apiKey) {
-    throw new Error("Invalid API Key");
-  }
+  // if (!apiKey) {
+  //   throw new Error("Invalid API Key");
+  // }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${apiKey}`,
   };
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await fetch("/api/completion", {
     headers: headers,
     method: "POST",
     body: JSON.stringify({
