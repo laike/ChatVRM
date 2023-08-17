@@ -11,10 +11,18 @@ import { MessageInputContainer } from "@/components/messageInputContainer";
 import { SYSTEM_PROMPT } from "@/features/constants/systemPromptConstants";
 import { KoeiroParam, DEFAULT_PARAM } from "@/features/constants/koeiroParam";
 import { getChatResponseStream } from "@/features/chat/openAiChat";
+//新增接入直播功能
+import { connect } from "@/features/blivedm/blivedm";
+import { chatPriorityQueue } from "@/features/queue/ChatPriorityQueue";
+
 import { Introduction } from "@/components/introduction";
 import { Menu } from "@/components/menu";
 import { GitHubLink } from "@/components/githubLink";
 import { Meta } from "@/components/meta";
+
+//socket 连接 新增
+const socket = connect()
+let bind_message_event = false;
 
 export default function Home() {
   const { viewer } = useContext(ViewerContext);
@@ -26,6 +34,7 @@ export default function Home() {
   const [chatProcessing, setChatProcessing] = useState(false);
   const [chatLog, setChatLog] = useState<Message[]>([]);
   const [assistantMessage, setAssistantMessage] = useState("");
+  const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
     if (window.localStorage.getItem("chatVRMParams")) {
@@ -76,7 +85,7 @@ export default function Home() {
    * アシスタントとの会話を行う
    */
   const handleSendChat = useCallback(
-    async (text: string) => {
+    async (text: string,cmd: string='',type: string='') => {
       // if (!openAiKey) {
       //   setAssistantMessage("APIキーが入力されていません");
       //   return;
@@ -84,7 +93,7 @@ export default function Home() {
       
 
       const newMessage = text;
-
+      const oldMessage = text;
       if (newMessage == null) return;
 
       setChatProcessing(true);
@@ -185,6 +194,33 @@ export default function Home() {
     [systemPrompt, chatLog, handleSpeakAi, openAiKey, koeiroParam]
   );
 
+  //新增直播弹幕
+  
+  useEffect(() => {
+
+    if (!bind_message_event) {
+
+      socket.then(webSocket => {
+        webSocket.onmessage = (event) => {
+          const data = event.data;
+          var chatMessage = JSON.parse(data);
+          chatPriorityQueue.queue({ message: chatMessage.message, priority: chatMessage.priority});
+          console.log('Received WebSocket data:', chatMessage);
+        };
+      })
+     
+      setInterval(() => {
+          if (chatPriorityQueue.length > 0) {
+              const chatMessage = chatPriorityQueue.dequeue();
+              handleSendChat(chatMessage.message.content,chatMessage.message.cmd,chatMessage.message.type).catch(e => {
+                console.log(e);
+              });
+              console.log('run handleSendChat chatMessage:',chatMessage);
+          }
+      }, 1000);
+      bind_message_event = true;
+    }
+  }, [handleSendChat]);
   return (
     <div className={"font-M_PLUS_2"}>
       <Meta />
