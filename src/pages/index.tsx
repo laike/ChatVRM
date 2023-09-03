@@ -21,8 +21,8 @@ import { GitHubLink } from "@/components/githubLink";
 import { Meta } from "@/components/meta";
 
 //socket 连接 新增
-const socket = connect()
-let bind_message_event = false;
+//const socket = connect()
+//let bind_message_event = false;
 
 export default function Home() {
   const { viewer } = useContext(ViewerContext);
@@ -196,31 +196,31 @@ export default function Home() {
 
   //新增直播弹幕
   
-  useEffect(() => {
+  // useEffect(() => {
 
-    if (!bind_message_event) {
+  //   if (!bind_message_event) {
 
-      socket.then(webSocket => {
-        webSocket.onmessage = (event) => {
-          const data = event.data;
-          var chatMessage = JSON.parse(data);
-          chatPriorityQueue.queue({ message: chatMessage.message, priority: chatMessage.priority});
-          console.log('Received WebSocket data:', chatMessage);
-        };
-      })
+  //     socket.then(webSocket => {
+  //       webSocket.onmessage = (event) => {
+  //         const data = event.data;
+  //         var chatMessage = JSON.parse(data);
+  //         chatPriorityQueue.queue({ message: chatMessage.message, priority: chatMessage.priority});
+  //         console.log('Received WebSocket data:', chatMessage);
+  //       };
+  //     })
      
-      setInterval(() => {
-          if (chatPriorityQueue.length > 0) {
-              const chatMessage = chatPriorityQueue.dequeue();
-              handleSendChat(chatMessage.message.content,chatMessage.message.cmd,chatMessage.message.type).catch(e => {
-                console.log(e);
-              });
-              console.log('run handleSendChat chatMessage:',chatMessage);
-          }
-      }, 1000);
-      bind_message_event = true;
-    }
-  }, [handleSendChat]);
+  //     setInterval(() => {
+  //         if (chatPriorityQueue.length > 0) {
+  //             const chatMessage = chatPriorityQueue.dequeue();
+  //             handleSendChat(chatMessage.message.content,chatMessage.message.cmd,chatMessage.message.type).catch(e => {
+  //               console.log(e);
+  //             });
+  //             console.log('run handleSendChat chatMessage:',chatMessage);
+  //         }
+  //     }, 1000);
+  //     bind_message_event = true;
+  //   }
+  // }, [handleSendChat]);
   return (
     <div className={"font-M_PLUS_2"}>
       <Meta />
